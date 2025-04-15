@@ -1,0 +1,75 @@
+name: "Full CI/CD Workflow call"
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select the environment'
+        type: environment
+        required: true
+        default: 'dev'
+
+jobs:
+  validate:
+    name: Validate Repository Variables
+    uses: BCHealth-ca/phsa-lra-mule-ci-cd/.github/workflows/variable-validation.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment || 'dev' }}
+    # No secrets required in this step
+
+  asset_check:
+    name: Check ASSET_TYPE Variables
+    uses: BCHealth-ca/phsa-lra-mule-ci-cd/.github/workflows/asset-type-check.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment || 'dev' }}
+    # No secrets required in this step
+
+  test:
+    name: Run Tests (Dev Only)
+    needs: validate
+    uses: BCHealth-ca/phsa-lra-mule-ci-cd/.github/workflows/test.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment || 'dev' }}
+    secrets:
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      CONNECTED_APP_CLIENT_ID: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
+      CONNECTED_APP_CLIENT_SECRET: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+
+  build_deploy_dev:
+    name: Build and Deploy Application (Dev)
+    needs: [validate, asset_check, test]
+    if: ${{ github.event.inputs.environment == '' || github.event.inputs.environment == 'dev' }}
+    uses: BCHealth-ca/phsa-lra-mule-ci-cd/.github/workflows/build-deploy.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment || 'dev' }}
+      asset_type: ${{ needs.asset_check.outputs.asset_type }}
+    secrets:
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      CONNECTED_APP_CLIENT_ID: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
+      CONNECTED_APP_CLIENT_SECRET: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+      ANYPOINT_BG_CLIENT_ID: ${{ secrets.ANYPOINT_BG_CLIENT_ID }}
+      ANYPOINT_BG_CLIENT_SECRET: ${{ secrets.ANYPOINT_BG_CLIENT_SECRET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+
+  build_deploy:
+    name: Build and Deploy Application
+    needs: [validate, asset_check]
+    if: ${{ github.event.inputs.environment != '' && github.event.inputs.environment != 'dev' }}
+    uses: BCHealth-ca/phsa-lra-mule-ci-cd/.github/workflows/build-deploy.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment || 'dev' }}
+      asset_type: ${{ needs.asset_check.outputs.asset_type }}
+    secrets:
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      CONNECTED_APP_CLIENT_ID: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
+      CONNECTED_APP_CLIENT_SECRET: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+      ANYPOINT_BG_CLIENT_ID: ${{ secrets.ANYPOINT_BG_CLIENT_ID }}
+      ANYPOINT_BG_CLIENT_SECRET: ${{ secrets.ANYPOINT_BG_CLIENT_SECRET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}

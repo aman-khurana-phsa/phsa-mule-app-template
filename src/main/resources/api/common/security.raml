@@ -1,0 +1,13 @@
+#%RAML 1.0 Library
+
+securitySchemes:
+
+  clientAuth:
+      description: The security scheme for authenticating and authorizing client requests.
+      type: x-custom
+      describedBy:
+        headers:
+          x-client-id:
+            description: Token identifying consumer application issued upon API access request.
+          x-client-secret:
+            description: Consumer application secret issued upon API access request.

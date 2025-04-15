@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="api:main" doc:id="407a7dfa-a74d-4c74-a222-3aa90bf94c68">
+        <http:listener doc:name="Listener" doc:id="a449b5d3-11bf-4c94-8867-c9ad9ac32007" config-ref="HTTP_Listener_config" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <flow-ref doc:name="api:set-vars-tracing" doc:id="b0de481d-f67a-43ed-95f5-be0407f40f4f" name="api:set-vars-tracing" />
+        <logger level="INFO" doc:name="Logger" doc:id="b644867b-da87-479b-b8cf-afc358c7abf5" message='#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, "HTTP REQUEST RECEIVED", message, (message) -&gt; logAttributes(message.attributes))]' />
+        <apikit:router doc:id="7e0efb66-da9e-462a-b521-5ca4822eff21" config-ref="main-config" doc:name="APIkit Router" />
+        <flow-ref doc:name="api:set-outbound-headers" doc:id="a7a2085d-1af9-4237-aaaf-e5115145bfde" name="api:set-outbound-headers"/>
+		<logger level="INFO" doc:name="Logger" doc:id="13fbec2e-2e6e-4fe6-b94c-b00540bc8dcf" message="#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, &quot;HTTP REQUEST FINISHED in $(((now() as Number {unit: 'milliseconds'}) - (vars.startTime default 0)) as String) ms.&quot;, message, (message) -&gt; logAttributes(message.attributes))]" />
+		<error-handler ref="exceptions:api_handler"/>
+    </flow>
+    <sub-flow name="api:set-vars-tracing" doc:id="55d64908-32cb-44df-bf28-ae2b0dc9ec51">
+        <set-variable value="#[attributes]" doc:name="requestAttributes" doc:id="a0d95751-51f9-4472-b118-554c53ff8f4b" variableName="requestAttributes" />
+        <set-variable value="#[now() as Number {unit: &quot;milliseconds&quot;}]" doc:name="startTime" doc:id="0f798e93-60f3-4fc8-9894-0c0b5aa3e944" variableName="startTime" />
+        <set-variable value="#[attributes.headers]" doc:name="headers" doc:id="1d30d812-0efe-4596-85d2-e43e6c9b277a" variableName="headers" />
+        <set-variable value="#[attributes.maskedRequestPath]" doc:name="path" doc:id="66524018-8f1c-4b7f-b7e5-017ac38f68ea" variableName="path" />
+        <set-variable value="#[attributes.method]" doc:name="originalHTTPMethod" doc:id="353a1e89-3fe7-475b-8a96-1ccb5764bef4" variableName="originalHTTPMethod" />
+    </sub-flow>
+    <sub-flow name="api:init-parameters" doc:id="2065f0f5-9399-44b9-be68-3c5e09b7c4c5">
+        <ee:transform doc:name="set-filter" doc:id="0e683bfe-4cf1-4820-a790-9e1382e622b4">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="filter"><![CDATA[%dw 2.0
+output application/json
+
+---
+{
+	queryParams: attributes.queryParams,
+	uriParams: attributes.uriParams
+}]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </sub-flow>
+	<sub-flow name="api:set-outbound-headers" doc:id="ba751fb5-0f7d-402a-9c41-1708d1f295e0" >
+		<ee:transform doc:name="outboundHeaders" doc:id="848e5ffe-ca69-482d-aa85-216541942c8f" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"x-correlation-id": correlationId
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+</mule>

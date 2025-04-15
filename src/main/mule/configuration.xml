@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" 
+	  xmlns:aws-secrets-manager-properties-override="http://www.mulesoft.org/schema/mule/aws-secrets-manager-properties-override" 
+	  xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" 
+	  xmlns="http://www.mulesoft.org/schema/mule/core" 
+	  xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" 
+	  xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" 
+	  xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	  xmlns:http="http://www.mulesoft.org/schema/mule/http" 	  
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/aws-secrets-manager-properties-override http://www.mulesoft.org/schema/mule/aws-secrets-manager-properties-override/current/mule-aws-secrets-manager-properties-override.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<global-property doc:name="Global Property" doc:id="d9fea4c8-9305-4af0-ab9f-e19e09e63378" name="mule.env" value="local" />
+
+    <configuration-properties doc:name="Configuration properties" doc:id="9edd5a6d-f839-4f39-addb-174951219c8e" file="config/${mule.env}-properties.yaml" />
+    <configuration-properties doc:name="Configuration properties" doc:id="bcd23326-8309-4be2-9492-a8ef5f4b7451" file="config/default-properties.yaml" />
+		
+	<aws-secrets-manager-properties-override:config name="AWS_Secrets_Manager_Properties_Override_Config" doc:name="AWS Secrets Manager Properties Override Config" doc:id="ca7b29ed-7d74-4960-8db5-33e7e7876330" >
+		<aws-secrets-manager-properties-override:basic-connection region="${aws.region}" accessKey="${aws.accessKeyId}" secretKey="${aws.secretKey}"/>
+	</aws-secrets-manager-properties-override:config>
+	
+	 <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e8b9badf-719a-4cf1-8dfc-de965e0a1a55">
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
+    </http:listener-config>
+    
+        <apikit:config name="main-config" api="main.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus"/>
+    
+ 
+</mule>

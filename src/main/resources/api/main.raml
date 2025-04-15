@@ -1,0 +1,20 @@
+#%RAML 1.0
+
+title: App-Template
+baseUri: https://hg-api.gov.bc.ca/${app-name}/v1
+version: 1.0.0
+
+documentation:
+  - title: Summary
+    content: !include summary.md
+
+mediaType: application/json
+
+protocols:
+  - HTTPS
+
+uses: 
+  Security: common/security.raml
+  Traits: common/traits.raml
+  Resources: common/resourceTypes.raml
+  

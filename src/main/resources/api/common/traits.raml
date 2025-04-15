@@ -1,0 +1,36 @@
+#%RAML 1.0 Library
+
+traits:
+  jwt:
+    headers:
+      authorization:
+        description: |
+          The Authorization header must contain a Bearer token. The header should follow the structure:
+          `Authorization: Bearer <JWT Token>`. This token is used for user authentication and authorization
+          of the request.
+        type: string
+    responses:
+      400:
+        description: Token was not provided.
+      401:
+        description: Bad or expired token. To fix, you should re-authenticate the user.
+      403:
+        description: The client id validation failed.
+      503:
+        description: Error communicating with JWKS server.
+
+  paged:
+    queryParameters:
+      pageIndex?:
+        description: Page number.
+        type: integer
+        minimum: 1        
+        default: 1
+        example: 1
+      pageSize?:
+        description: Number of records per page.
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 10
+        example: 10

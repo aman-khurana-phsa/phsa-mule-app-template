@@ -1,0 +1,51 @@
+#%RAML 1.0 Library
+
+uses:
+  Traits: traits.raml
+  
+resourceTypes:
+  Collection:
+    get?:
+      description: Returns a collection of <<resourceLabel | !pluralize>>.
+      is: <<authTraits>>
+      responses:
+        200:
+          body:
+            type: object
+            properties:
+              pageIndex?:
+                type: integer
+                description: The page number.
+              pageSize?:
+                type: integer
+                description: The number of records returned in the current page.
+              totalResultCount?:
+                type: integer
+                description: The total number of records returned.
+              resourcePayload?:
+                type: array
+                items: <<getResponseType>>
+              resultStatus:
+                type: integer
+                description: |
+                  An enum representing the possible results for our transactions.
+                  - 0 Represents a system error condition
+                  - 1 Represents a successful result
+                  - 2 Represents that the request needs an user action
+                enum: [0, 1, 2]
+              resultError?:
+                type: object
+                properties:
+                  resultMessage?:
+                    type: string
+                    description: A descriptive message about the error
+                  errorCode?:
+                    type: string
+                    description: A short code identifying the error
+                  traceId?:
+                    type: string
+                    description: A unique identifier to identify the transaction
+                  actionCode?:
+                    type: string
+                    description: A short code that identifies the action needed from user, always set when resultStatus=2
+            examples: <<getSampleResponse>>
