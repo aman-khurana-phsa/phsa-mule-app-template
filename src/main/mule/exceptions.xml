@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="exceptions:api_handler" doc:id="5146de93-eb0a-4be3-9a8c-7853b21f0eb9" >
+		<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="72b7f037-0040-41d6-86b9-df4ce62fcd31" type="APIKIT:BAD_REQUEST" >
+			<ee:transform doc:name="Transform Message" doc:id="a474ae6e-9bea-4c33-a324-bcf5d704bc90" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "resultStatus": 1,
+  "resourceError": {
+  	"resultMessage": "Bad Request $(error.description default '')"
+  }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="735aa6a5-e1d5-43b8-9774-6f0a29f3fd23" type="APIKIT:NOT_FOUND" >
+			<ee:transform doc:name="Transform Message" doc:id="7d10a35f-12f7-44db-8cd8-85be239684e6" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "resultStatus": 1,
+  "resourceError": {
+  	"resultMessage": "Resource not found"
+  }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="03774558-c089-432d-aeff-d6ff6900ddaf" type="APIKIT:METHOD_NOT_ALLOWED" >
+			<ee:transform doc:name="Transform Message" doc:id="cb314603-4e31-4562-82e5-c27713fc05f0" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "resultStatus": 1,
+  "resourceError": {
+  	"resultMessage": "Method not allowed"
+  }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[405]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="ab97ed07-ec8a-4cdf-a29a-d807bd016d64" type="APIKIT:NOT_ACCEPTABLE" >
+			<ee:transform doc:name="Transform Message" doc:id="02a8641e-f858-4091-9f44-f7055e1ba8f1" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "resultStatus": 1,
+  "resourceError": {
+  	"resultMessage": "Not acceptable"
+  }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[406]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="a6f0bb87-099b-4a63-822a-960402def0c4" type="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
+			<ee:transform doc:name="Transform Message" doc:id="04af64c2-c9ac-46d7-9c2f-66fac39e5aee" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "resultStatus": 1,
+  "resourceError": {
+  	"resultMessage": "Unsupported media type"
+  }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[415]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="01c8a05f-90d3-4bfa-9c84-fe7cf1845daa" type="APIKIT:NOT_IMPLEMENTED" >
+			<ee:transform doc:name="Transform Message" doc:id="f7659ea1-e004-422b-be3e-90d0377ed1ed" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "resultStatus": 1,
+  "resourceError": {
+  	"resultMessage": "Not implemented"
+  }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[501]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+	
+	<error-handler name="exceptions:impl_generic_error_handler" doc:id="f9ead352-1e46-4bd4-8d34-cf89379207c1">
+  <on-error-continue enableNotifications="false" logException="true" doc:name="On Error Continue" doc:id="fb3d4874-1ea2-4199-8603-cdb4cdc5644c" type="ANY">
+    <!-- Log the error with a dynamic logger -->
+    <logger level="ERROR" doc:name="Logger" doc:id="6fa73eff-a030-4494-a523-6c7322d5f2a0" message='#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, error.errorType.identifier, error, (e) -> logError(e))]' />
+    
+    <!-- Transform the error message to a standardized JSON payload -->
+    <ee:transform doc:name="Transform Message" doc:id="a8007346-d22f-43d4-8a19-0d5fbceeb199">
+      <ee:message>
+        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+// Importing necessary functions for mapping HTTP status codes
+import * from functions::exceptionFunc
+
+// Map the error type (using both namespace and identifier) to an HTTP status
+var mappedStatus = mapHttpStatus(error.errorType.namespace ++ ":" ++ error.errorType.identifier)
+---
+{
+  "metadata": {
+    // Use the current timestamp or modify as needed for your context
+    "timestamp": now() as String, 
+    "correlationId": vars.correlationId default "not available"
+  },
+  "error": {
+    // Use the mapped status code and message, falling back to defaults if necessary
+    "code": mappedStatus.code as String,
+    "message": mappedStatus.message,
+    "details": [
+      {
+        "system": "<< App Name >>",
+        "code": error.errorMessage.attributes.statusCode default (mappedStatus.code as String),
+        "message": error.errorMessage.payload.error_description default error.description
+      }
+    ]
+  }
+}]]></ee:set-payload>
+      </ee:message>
+      
+      <!-- Set the HTTP status variable if needed for response configuration -->
+      <ee:variables>
+        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output text
+---
+mapHttpStatus(error.errorType.namespace ++ ":" ++ error.errorType.identifier).code]]></ee:set-variable>
+      </ee:variables>
+    </ee:transform>
+  </on-error-continue>
+</error-handler>
+	<error-handler name="exceptions:impl_FHIR_error_handler" doc:id="d6f356e6-aa5f-42cb-8030-e045a469684b" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="71b1c5ab-5fac-42a3-9af4-555734c4d2b1" type="ANY">
+			    <!-- Build both payload & HTTP attributes in one Transform -->
+      <logger level="ERROR" doc:name="Logger" doc:id="b962733a-f434-4e16-889e-55fed76ceb63" message="#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, error.errorType.identifier, error, (e) -&gt; logError(e))]" />
+			<ee:transform doc:name="Build OperationOutcome and Response Attributes">
+        <ee:message>
+          <!-- FHIR OperationOutcome JSON -->
+          <ee:set-payload><![CDATA[%dw 2.6
+output application/fhir+json
+
+var msg   = error.description default "Unknown error"
+var loc   = if (error.errorType? and error.errorType.name?) error.errorType.name else "unknown"
+var idStr = now() as String {format: "yyyyMMddHHmmss"}
+
+---
+{
+  resourceType: "OperationOutcome",
+  id: "oo-" ++ idStr,
+  issue: [
+    {
+      severity   : "error",
+      code       : "processing",
+      details    : {
+        coding : [
+          {
+            system : "http://hl7.org/fhir/issue-type",
+            code   : "invalid",
+            display: "Invalid content"
+          }
+        ],
+        text   : msg
+      },
+      diagnostics: msg,
+      location   : [ "/" ++ loc ]
+    }
+  ]
+}
+]]></ee:set-payload>
+
+          <!-- set HTTP status & headers -->
+          <ee:set-attributes><![CDATA[%dw 2.6
+output application/java
+
+// Use the error.statusCode (or default to 500) and set Content-Type
+---
+{
+  statusCode: error.statusCode default 500,
+  headers: {
+    "Content-Type": "application/fhir+json"
+  }
+}
+]]></ee:set-attributes>
+        </ee:message>
+      </ee:transform>
+		</on-error-propagate>
+		
+	</error-handler>
+	
+</mule>
