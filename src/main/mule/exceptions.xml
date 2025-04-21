@@ -115,7 +115,7 @@ output application/json
 		</on-error-propagate>
 	</error-handler>
 	
-	<error-handler name="exceptions:generic_error_handler" doc:id="f9ead352-1e46-4bd4-8d34-cf89379207c1">
+	<error-handler name="exceptions:impl_generic_error_handler" doc:id="f9ead352-1e46-4bd4-8d34-cf89379207c1">
   <on-error-continue enableNotifications="false" logException="true" doc:name="On Error Continue" doc:id="fb3d4874-1ea2-4199-8603-cdb4cdc5644c" type="ANY">
     <!-- Log the error with a dynamic logger -->
     <logger level="ERROR" doc:name="Logger" doc:id="6fa73eff-a030-4494-a523-6c7322d5f2a0" message='#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, error.errorType.identifier, error, (e) -> logError(e))]' />
@@ -162,5 +162,62 @@ mapHttpStatus(error.errorType.namespace ++ ":" ++ error.errorType.identifier).co
     </ee:transform>
   </on-error-continue>
 </error-handler>
+	<error-handler name="exceptions:impl_FHIR_error_handler" doc:id="d6f356e6-aa5f-42cb-8030-e045a469684b" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="71b1c5ab-5fac-42a3-9af4-555734c4d2b1" type="ANY">
+			    <!-- Build both payload & HTTP attributes in one Transform -->
+      <logger level="ERROR" doc:name="Logger" doc:id="b962733a-f434-4e16-889e-55fed76ceb63" message="#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, error.errorType.identifier, error, (e) -&gt; logError(e))]" />
+			<ee:transform doc:name="Build OperationOutcome and Response Attributes">
+        <ee:message>
+          <!-- FHIR OperationOutcome JSON -->
+          <ee:set-payload><![CDATA[%dw 2.6
+output application/fhir+json
+
+var msg   = error.description default "Unknown error"
+var loc   = if (error.errorType? and error.errorType.name?) error.errorType.name else "unknown"
+var idStr = now() as String {format: "yyyyMMddHHmmss"}
+
+---
+{
+  resourceType: "OperationOutcome",
+  id: "oo-" ++ idStr,
+  issue: [
+    {
+      severity   : "error",
+      code       : "processing",
+      details    : {
+        coding : [
+          {
+            system : "http://hl7.org/fhir/issue-type",
+            code   : "invalid",
+            display: "Invalid content"
+          }
+        ],
+        text   : msg
+      },
+      diagnostics: msg,
+      location   : [ "/" ++ loc ]
+    }
+  ]
+}
+]]></ee:set-payload>
+
+          <!-- set HTTP status & headers -->
+          <ee:set-attributes><![CDATA[%dw 2.6
+output application/java
+
+// Use the error.statusCode (or default to 500) and set Content-Type
+---
+{
+  statusCode: error.statusCode default 500,
+  headers: {
+    "Content-Type": "application/fhir+json"
+  }
+}
+]]></ee:set-attributes>
+        </ee:message>
+      </ee:transform>
+		</on-error-propagate>
+		
+	</error-handler>
 	
 </mule>
