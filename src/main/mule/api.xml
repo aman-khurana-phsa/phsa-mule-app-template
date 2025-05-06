@@ -11,11 +11,10 @@
             </http:error-response>
         </http:listener>
         <flow-ref doc:name="api:set-vars-tracing" doc:id="b0de481d-f67a-43ed-95f5-be0407f40f4f" name="api:set-vars-tracing" />
-        <logger level="INFO" doc:name="Logger" doc:id="b644867b-da87-479b-b8cf-afc358c7abf5" message='#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, "HTTP REQUEST RECEIVED", message, (message) -&gt; logAttributes(message.attributes))]' />
-        <apikit:router doc:id="7e0efb66-da9e-462a-b521-5ca4822eff21" config-ref="main-config" doc:name="APIkit Router" />
-        <flow-ref doc:name="api:set-outbound-headers" doc:id="a7a2085d-1af9-4237-aaaf-e5115145bfde" name="api:set-outbound-headers"/>
-		<logger level="INFO" doc:name="Logger" doc:id="13fbec2e-2e6e-4fe6-b94c-b00540bc8dcf" message="#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, &quot;HTTP REQUEST FINISHED in $(((now() as Number {unit: 'milliseconds'}) - (vars.startTime default 0)) as String) ms.&quot;, message, (message) -&gt; logAttributes(message.attributes))]" />
-		<error-handler ref="exceptions:api_handler"/>
+        <logger level="INFO" doc:name="Logger" doc:id="1334dbda-b44d-4c57-b591-c954bbf51c73" message='#[import * from functions::loggerFunc output json --- printLogEntryV2(correlationId, "HTTP REQUEST RECEIVED", message, (message) -&gt; logAttributes(message.attributes))]' />
+		<apikit:router doc:id="7e0efb66-da9e-462a-b521-5ca4822eff21" config-ref="main-config" doc:name="APIkit Router" />
+        <flow-ref doc:name="api:set-outbound-headers" doc:id="a7a2085d-1af9-4237-aaaf-e5115145bfde" name="api:set-outbound-headers" />
+		<error-handler ref="exceptions:api_handler" />
     </flow>
     <sub-flow name="api:set-vars-tracing" doc:id="55d64908-32cb-44df-bf28-ae2b0dc9ec51">
         <set-variable value="#[attributes]" doc:name="requestAttributes" doc:id="a0d95751-51f9-4472-b118-554c53ff8f4b" variableName="requestAttributes" />
@@ -39,18 +38,17 @@ output application/json
             </ee:variables>
         </ee:transform>
     </sub-flow>
-	<sub-flow name="api:set-outbound-headers" doc:id="ba751fb5-0f7d-402a-9c41-1708d1f295e0" >
-		<ee:transform doc:name="outboundHeaders" doc:id="848e5ffe-ca69-482d-aa85-216541942c8f" >
-			<ee:message >
-			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
+    <sub-flow name="api:set-outbound-headers" doc:id="ba751fb5-0f7d-402a-9c41-1708d1f295e0">
+        <ee:transform doc:name="outboundHeaders" doc:id="848e5ffe-ca69-482d-aa85-216541942c8f">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="outboundHeaders"><![CDATA[%dw 2.0
 output application/java
 ---
 {
 	"x-correlation-id": correlationId
 }]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-	</sub-flow>
+            </ee:variables>
+        </ee:transform>
+    </sub-flow>
 </mule>

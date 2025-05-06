@@ -25,6 +25,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
     </http:listener-config>
     
         <apikit:config name="main-config" api="main.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus"/>
+	<import doc:name="Import" doc:id="433a905a-4c16-4d69-a9a9-b27a1fa6797f" file="health-check-flow.xml" />
     
  
 </mule>

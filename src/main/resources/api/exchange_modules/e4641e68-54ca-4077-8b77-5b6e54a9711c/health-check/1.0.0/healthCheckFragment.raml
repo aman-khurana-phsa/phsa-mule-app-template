@@ -1,0 +1,10 @@
+#%RAML 1.0 Library
+
+uses: 
+  HealthResources: health/healthResourceTypes.raml
+
+resourceTypes:
+  healthResource:
+    type: HealthResources.Health
+    get:
+      displayName: Returns health check status
