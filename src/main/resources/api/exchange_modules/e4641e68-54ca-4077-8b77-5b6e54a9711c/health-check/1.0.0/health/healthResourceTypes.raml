@@ -1,0 +1,12 @@
+#%RAML 1.0 Library
+
+resourceTypes:
+  Health:
+    get:
+      description: Returns Health status check.
+      responses:
+        200:
+          body:
+            type: !include healthBaseType.raml
+            examples: !include examples/get-health-response.raml
+

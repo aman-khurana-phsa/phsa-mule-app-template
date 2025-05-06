@@ -1,0 +1,16 @@
+#%RAML 1.0 DataType
+
+displayName: Health Base Type
+description: An Health Check record
+type: object
+additionalProperties: false
+properties:
+  app:
+    type: !include ../health/schemas/appType.raml
+  status:
+    type: !include ../health/schemas/statusType.raml
+  timestamp:
+    type: !include ../health/schemas/timestampType.raml
+  dependencies?:
+    type: array
+    items: !include ../health/schemas/dependenciesType.raml

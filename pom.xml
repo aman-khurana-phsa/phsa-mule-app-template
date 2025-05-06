@@ -118,9 +118,22 @@
 			<artifactId>mule4-aws-secrets-manager-properties-provider</artifactId>
 			<classifier>mule-plugin</classifier>
 		</dependency>
+		<!-- this is the reference to the common flows library -->
+		<dependency>
+			<groupId>e4641e68-54ca-4077-8b77-5b6e54a9711c</groupId>
+			<artifactId>common-flows</artifactId>
+			<version>1.0.0</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
 	</dependencies>
 
 	<repositories>
+		<repository>
+			<id>anypoint-exchange</id>
+			<name>Anypoint Exchange</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v1/maven</url>
+		</repository>
+
 		<repository>
 			<id>anypoint-exchange-v3</id>
 			<name>Anypoint Exchange</name>
@@ -137,6 +150,10 @@
 
 	<pluginRepositories>
 		<pluginRepository>
+			<id>anypoint-exchange</id>
+			<url>https://maven.anypoint.mulesoft.com/api/v1/maven</url>
+		</pluginRepository>
+		<pluginRepository>
 			<id>mulesoft-releases</id>
 			<name>MuleSoft Releases Repository</name>
 			<layout>default</layout>
@@ -146,5 +163,6 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
+	
 
 </project>
